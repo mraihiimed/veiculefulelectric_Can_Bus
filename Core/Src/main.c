@@ -52,6 +52,14 @@ uint8_t soilMoisture = 55;
 uint8_t fuelLevel = 70;
 float decodedLat = 52.5150;
 float decodedLon = 13.4060;
+uint8_t diagFlags;
+//float economy;
+//uint16_t latScaled;
+//typedef struct {
+//    float economy;
+//    uint16_t latScaled;
+//} DiagnosticTelemetry;
+
 
 /* USER CODE BEGIN PV */
 
@@ -104,13 +112,14 @@ int main(void)
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
   FuelActuator_CAN_Init(&hcan1);
-  uint8_t diagFlags;
+
   float latitude = 52.515;
-  uint16_t latScaled = ScaleGPS(latitude);
+  DiagnosticTelemetry diag = {0};
+
 
   FuelActuatorMessage msg = { .id = 0x321 };
 
-      // Here’s the usage example:
+  // Here’s the usage example:
   FuelActuator_EncodeSignals(&msg,
 							 120,    // Vehicle speed in km/h
 							 0x7F,   // Timestamp LSB
@@ -118,8 +127,17 @@ int main(void)
 							 3000,   // Engine RPM
 							 85,     // Oil Temperature
 							 75);    // Engine Load %
-  float economy = FuelEfficiencyLookup(msg.data[2]);  // if using msg index as reference
+  /*Update the value*/
+  diag.latScaled = ScaleGPS(latitude);
+  diag.economy = FuelEfficiencyLookup(msg.data[2]);  // if using msg index as reference
+
+
+
+  /*Encoding the CAN message */
   AgriCAN_EncodeStatusFlags(&diagFlags);
+
+
+  /*Send the message via CAN1*/
   FuelActuator_SendCommand(&hcan1, &msg);
 
 
@@ -134,14 +152,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-	  printf("Soil Moisture: %d %%\r\n", soilMoisture);
-	  printf("Fuel Level: %d %%\r\n", fuelLevel);
-	  printf("GPS Position: %.4f°, %.4f°\r\n", decodedLat, decodedLon);
-	  printf("Sensor Status: 0x%02X\r\n", diagFlags);
-	  printf("Fuel Economy Index: %.2f\r\n", economy);
-	  printf("Latitude Scaled: %u\r\n", latScaled);
-
+      PrintTelemetryStatus(soilMoisture, fuelLevel, decodedLat, decodedLon,
+	                       diagFlags, diag);
 
 
   }
@@ -293,6 +305,19 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+void PrintTelemetryStatus(uint8_t soilMoisture, uint8_t fuelLevel,
+        float decodedLat, float decodedLon,
+        uint8_t diagFlags, DiagnosticTelemetry diag) {
+  printf("Soil Moisture: %d %%\r\n", soilMoisture);
+  printf("Fuel Level: %d %%\r\n", fuelLevel);
+  printf("GPS Position: %.4f°, %.4f°\r\n", decodedLat, decodedLon);
+  printf("Sensor Status: 0x%02X\r\n", diagFlags);
+  printf("Fuel Economy Index: %.2f\r\n", diag.economy);
+  printf("Latitude Scaled: %u\r\n", diag.latScaled);
+}
+
 
 /* USER CODE END 4 */
 

@@ -37,7 +37,15 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef struct {
+//	uint8_t soilMoisture = 55;
+//	uint8_t fuelLevel = 70;
+//	float decodedLat = 52.5150;
+//	float decodedLon = 13.4060;
+//	uint8_t diagFlags;
+    float economy;
+    uint16_t latScaled;
+} DiagnosticTelemetry;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -60,7 +68,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 
 /* USER CODE BEGIN Private defines */
-//void Error_Handler(void);
+
+void PrintTelemetryStatus(uint8_t soilMoisture, uint8_t fuelLevel,
+        float decodedLat, float decodedLon,
+        uint8_t diagFlags, DiagnosticTelemetry diag);
 
 /* USER CODE END Private defines */
 
