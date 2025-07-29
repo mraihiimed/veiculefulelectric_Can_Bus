@@ -18,11 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
 #include "vehiculefulelectric.h"
+#include "agrisensorcan.h"
 
 /* USER CODE END Includes */
 
@@ -45,6 +47,11 @@
 CAN_HandleTypeDef hcan1;
 
 UART_HandleTypeDef huart2;
+
+uint8_t soilMoisture = 55;
+uint8_t fuelLevel = 70;
+float decodedLat = 52.5150;
+float decodedLon = 13.4060;
 
 /* USER CODE BEGIN PV */
 
@@ -97,11 +104,9 @@ int main(void)
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
   FuelActuator_CAN_Init(&hcan1);
-//  FuelActuatorMessage msg = {
-//	  .id = 0x123, // Actuator CAN ID
-//	  .dlc = 8,
-//	  .data = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-//  };
+  uint8_t diagFlags;
+  float latitude = 52.515;
+  uint16_t latScaled = ScaleGPS(latitude);
 
   FuelActuatorMessage msg = { .id = 0x321 };
 
@@ -113,9 +118,12 @@ int main(void)
 							 3000,   // Engine RPM
 							 85,     // Oil Temperature
 							 75);    // Engine Load %
-
-
+  float economy = FuelEfficiencyLookup(msg.data[2]);  // if using msg index as reference
+  AgriCAN_EncodeStatusFlags(&diagFlags);
   FuelActuator_SendCommand(&hcan1, &msg);
+
+
+
 
   /* USER CODE END 2 */
 
@@ -126,6 +134,15 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	  printf("Soil Moisture: %d %%\r\n", soilMoisture);
+	  printf("Fuel Level: %d %%\r\n", fuelLevel);
+	  printf("GPS Position: %.4f°, %.4f°\r\n", decodedLat, decodedLon);
+	  printf("Sensor Status: 0x%02X\r\n", diagFlags);
+	  printf("Fuel Economy Index: %.2f\r\n", economy);
+	  printf("Latitude Scaled: %u\r\n", latScaled);
+
+
 
   }
   /* USER CODE END 3 */

@@ -8,9 +8,10 @@
 #ifndef INC_VEHICULEFULELECTRIC_H_
 #define INC_VEHICULEFULELECTRIC_H_
 
+#include <stdint.h>
 #include "stm32f4xx_hal.h"
 
-// CAN message structure
+/* CAN message structure */
 typedef struct {
     uint32_t id;
     uint8_t dlc;
@@ -24,7 +25,7 @@ typedef enum {
     QUALITY_MEASURED = 2
 } SpeedQuality;
 
-// Initialization functions
+/* Initialization functions */
 void FuelActuator_CAN_Init(CAN_HandleTypeDef *hcan);
 void FuelActuator_SendCommand(CAN_HandleTypeDef *hcan, FuelActuatorMessage *msg);
 

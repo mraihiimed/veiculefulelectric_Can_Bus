@@ -1,0 +1,11 @@
+../Core/Src/agrisensorcan.c:21:5:soilSensorIsOK	4	static
+../Core/Src/agrisensorcan.c:22:5:fuelSensorIsOK	4	static
+../Core/Src/agrisensorcan.c:23:5:pressureSensorIsOK	4	static
+../Core/Src/agrisensorcan.c:24:5:speedSensorIsOK	4	static
+../Core/Src/agrisensorcan.c:25:5:gpsSensorIsOK	4	static
+../Core/Src/agrisensorcan.c:28:6:AgriCAN_EncodeStatusFlags	16	static
+../Core/Src/agrisensorcan.c:37:6:AgriCAN_EncodeTelemetry	16	static
+../Core/Src/agrisensorcan.c:54:6:AgriCAN_DecodeTelemetry	24	static
+../Core/Src/agrisensorcan.c:70:10:ScaleGPS	16	static
+../Core/Src/agrisensorcan.c:105:7:FuelEfficiencyLookup	16	static
+../Core/Src/agrisensorcan.c:111:6:TestDiagnostics	24	static

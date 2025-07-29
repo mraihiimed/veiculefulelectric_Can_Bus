@@ -1,4 +1,4 @@
-../Core/Src/vehiculefulelectric.c:19:6:FuelActuator_EncodeSignals	16	static
-../Core/Src/vehiculefulelectric.c:42:6:FuelActuator_DecodeSignals	24	static
-../Core/Src/vehiculefulelectric.c:58:6:FuelActuator_CAN_Init	16	static
-../Core/Src/vehiculefulelectric.c:78:6:FuelActuator_SendCommand	48	static
+../Core/Src/vehiculefulelectric.c:11:6:FuelActuator_EncodeSignals	16	static
+../Core/Src/vehiculefulelectric.c:34:6:FuelActuator_DecodeSignals	24	static
+../Core/Src/vehiculefulelectric.c:50:6:FuelActuator_CAN_Init	16	static
+../Core/Src/vehiculefulelectric.c:70:6:FuelActuator_SendCommand	48	static

@@ -8,14 +8,6 @@
 
 #include "vehiculefulelectric.h"
 
-
-/*void FuelActuator_EncodeSignals(FuelActuatorMessage *msg,
-                                uint16_t vehicleSpeed,
-                                uint8_t timestampLSB,
-                                uint8_t speedQuality,
-                                uint16_t engineRPM,
-                                uint8_t oilTemp,
-                                uint8_t engineLoad) {*/
 void FuelActuator_EncodeSignals(FuelActuatorMessage *msg,
 								uint16_t vehicleSpeed,
 								uint8_t timestampLSB,
