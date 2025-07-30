@@ -18,34 +18,30 @@ typedef struct {
     uint8_t data[8];
 } FuelActuatorMessage;
 
-
 typedef enum {
     QUALITY_INVALID = 0,
     QUALITY_ESTIMATED = 1,
     QUALITY_MEASURED = 2
 } SpeedQuality;
 
+/* New Data Struct for CAN Encoding */
+typedef struct {
+    uint16_t vehicleSpeed;
+    uint8_t timestampLSB;
+    SpeedQuality speedQuality;
+    uint16_t engineRPM;
+    uint8_t oilTemp;
+    uint8_t engineLoad;
+} FuelActuatorData;
+
 /* Initialization functions */
 void FuelActuator_CAN_Init(CAN_HandleTypeDef *hcan);
 void FuelActuator_SendCommand(CAN_HandleTypeDef *hcan, FuelActuatorMessage *msg);
 
-void FuelActuator_EncodeSignals(FuelActuatorMessage *msg,
-                                uint16_t vehicleSpeed,
-                                uint8_t timestampLSB,
-								SpeedQuality speedQuality,
-                                //uint8_t speedQuality,
-                                uint16_t engineRPM,
-                                uint8_t oilTemp,
-                                uint8_t engineLoad) ;
+/* Updated encoding and decoding with new struct */
+void FuelActuator_EncodeSignals(FuelActuatorMessage *msg, const FuelActuatorData *data);
+void FuelActuator_DecodeSignals(FuelActuatorMessage *msg, FuelActuatorData *data);
 
-void FuelActuator_DecodeSignals(FuelActuatorMessage *msg,
-                                uint16_t *vehicleSpeed,
-                                uint8_t *timestampLSB,
-                                uint8_t *speedQuality,
-                                uint16_t *engineRPM,
-                                uint8_t *oilTemp,
-                                uint8_t *engineLoad);
 void Error_Handler(void);
-
 
 #endif /* INC_VEHICULEFULELECTRIC_H_ */

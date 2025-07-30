@@ -25,6 +25,11 @@
 
 #include "vehiculefulelectric.h"
 #include "agrisensorcan.h"
+#include "test_FuelActuator_EncodeSignals.h"
+
+#include "session_control.h"
+#include "ecu_reset.h"
+
 
 /* USER CODE END Includes */
 
@@ -53,12 +58,6 @@ uint8_t fuelLevel = 70;
 float decodedLat = 52.5150;
 float decodedLon = 13.4060;
 uint8_t diagFlags;
-//float economy;
-//uint16_t latScaled;
-//typedef struct {
-//    float economy;
-//    uint16_t latScaled;
-//} DiagnosticTelemetry;
 
 
 /* USER CODE BEGIN PV */
@@ -71,6 +70,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_CAN1_Init(void);
 /* USER CODE BEGIN PFP */
+/*extern void test_FuelActuator_EncodeSignals(FuelActuatorMessage* msg, const FuelActuatorData* data);*/
 
 /* USER CODE END PFP */
 
@@ -111,22 +111,31 @@ int main(void)
   MX_USART2_UART_Init();
   MX_CAN1_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_CAN_Start(&hcan1);
+  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);
+
   FuelActuator_CAN_Init(&hcan1);
 
   float latitude = 52.515;
   DiagnosticTelemetry diag = {0};
 
 
-  FuelActuatorMessage msg = { .id = 0x321 };
+
 
   // Here’s the usage example:
-  FuelActuator_EncodeSignals(&msg,
-							 120,    // Vehicle speed in km/h
-							 0x7F,   // Timestamp LSB
-							 QUALITY_MEASURED, //2,      // Quality: 2 = measured
-							 3000,   // Engine RPM
-							 85,     // Oil Temperature
-							 75);    // Engine Load %
+  FuelActuatorData actuatorData = {
+      .vehicleSpeed = 120,
+      .timestampLSB = 0x7F,
+      .speedQuality = QUALITY_MEASURED,
+      .engineRPM = 3000,
+      .oilTemp = 85,
+      .engineLoad = 75
+  };
+  FuelActuatorMessage msg = { .id = 0x321 };
+
+  FuelActuator_EncodeSignals(&msg, &actuatorData);
+
   /*Update the value*/
   diag.latScaled = ScaleGPS(latitude);
   diag.economy = FuelEfficiencyLookup(msg.data[2]);  // if using msg index as reference
@@ -154,6 +163,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
       PrintTelemetryStatus(soilMoisture, fuelLevel, decodedLat, decodedLon,
 	                       diagFlags, diag);
+      /*test_FuelActuator_EncodeSignals(&msg, &actuatorData);*/
 
 
   }
@@ -247,6 +257,21 @@ static void MX_CAN1_Init(void)
   }
   /* USER CODE BEGIN CAN1_Init 2 */
 
+  CAN_FilterTypeDef canfilterconfig;
+
+  canfilterconfig.FilterActivation = CAN_FILTER_ENABLE;
+  canfilterconfig.FilterBank = 18;
+  canfilterconfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+  canfilterconfig.FilterIdHigh = 0x0000;//0x103<<5;
+  canfilterconfig.FilterIdLow = 0;
+  canfilterconfig.FilterMaskIdHigh = 0x0000;// 0x103<<5;
+  canfilterconfig.FilterMaskIdLow =0x0000;
+  canfilterconfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  canfilterconfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  canfilterconfig.SlaveStartFilterBank=40;// how many filters to assign to the CAN1 (master can)
+
+
+  HAL_CAN_ConfigFilter(&hcan1, &canfilterconfig);
   /* USER CODE END CAN1_Init 2 */
 
 }
@@ -318,6 +343,35 @@ void PrintTelemetryStatus(uint8_t soilMoisture, uint8_t fuelLevel,
   printf("Latitude Scaled: %u\r\n", diag.latScaled);
 }
 
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
+    CAN_RxHeaderTypeDef rxHeader;
+    uint8_t rxData[8];
+    uint8_t txData[8] = {0}; // Response buffer
+
+
+    HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rxHeader, rxData);
+
+    // Dispatch based on UDS service ID
+    switch (rxData[0]) {
+        case 0x10:
+            HandleSessionControl(rxData, txData);
+            break;
+        case 0x11:
+            HandleECUReset(rxData, txData);
+            break;
+        // Add other UDS services here
+    }
+
+    // Send response
+    CAN_TxHeaderTypeDef txHeader = {
+        .StdId = 0x7E8, // ECU response ID
+        .IDE = CAN_ID_STD,
+        .RTR = CAN_RTR_DATA,
+        .DLC = 8
+    };
+    uint32_t txMailbox;
+    HAL_CAN_AddTxMessage(hcan, &txHeader, txData, &txMailbox);
+}
 
 /* USER CODE END 4 */
 

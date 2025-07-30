@@ -8,42 +8,26 @@
 
 #include "vehiculefulelectric.h"
 
-void FuelActuator_EncodeSignals(FuelActuatorMessage *msg,
-								uint16_t vehicleSpeed,
-								uint8_t timestampLSB,
-								SpeedQuality speedQuality,
-								uint16_t engineRPM,
-								uint8_t oilTemp,
-								uint8_t engineLoad) {
-    // VehicleSpeed
-    msg->data[0] = vehicleSpeed & 0xFF;
-    msg->data[1] = (vehicleSpeed >> 8) & 0xFF;
-    msg->data[2] = timestampLSB;
-    msg->data[3] = (uint8_t)speedQuality;
-
-    // EngineSpeed
-    msg->data[4] = engineRPM & 0xFF;
-    msg->data[5] = (engineRPM >> 8) & 0xFF;
-    msg->data[6] = oilTemp;
-    msg->data[7] = engineLoad;
-
-    msg->dlc = 8; // Full CAN frame
+void FuelActuator_EncodeSignals(FuelActuatorMessage *msg, const FuelActuatorData *data) {
+    msg->data[0] = data->vehicleSpeed & 0xFF;
+    msg->data[1] = (data->vehicleSpeed >> 8) & 0xFF;
+    msg->data[2] = data->timestampLSB;
+    msg->data[3] = (uint8_t)data->speedQuality;
+    msg->data[4] = data->engineRPM & 0xFF;
+    msg->data[5] = (data->engineRPM >> 8) & 0xFF;
+    msg->data[6] = data->oilTemp;
+    msg->data[7] = data->engineLoad;
+    msg->dlc = 8;
 }
 
 
-void FuelActuator_DecodeSignals(FuelActuatorMessage *msg,
-                                uint16_t *vehicleSpeed,
-                                uint8_t *timestampLSB,
-                                uint8_t *speedQuality,
-                                uint16_t *engineRPM,
-                                uint8_t *oilTemp,
-                                uint8_t *engineLoad) {
-    *vehicleSpeed = msg->data[0] | (msg->data[1] << 8);
-    *timestampLSB = msg->data[2];
-    *speedQuality = msg->data[3];
-    *engineRPM = msg->data[4] | (msg->data[5] << 8);
-    *oilTemp = msg->data[6];
-    *engineLoad = msg->data[7];
+void FuelActuator_DecodeSignals(FuelActuatorMessage *msg, FuelActuatorData *data) {
+    data->vehicleSpeed = msg->data[0] | (msg->data[1] << 8);
+    data->timestampLSB = msg->data[2];
+    data->speedQuality = (SpeedQuality)msg->data[3];
+    data->engineRPM = msg->data[4] | (msg->data[5] << 8);
+    data->oilTemp = msg->data[6];
+    data->engineLoad = msg->data[7];
 }
 
 

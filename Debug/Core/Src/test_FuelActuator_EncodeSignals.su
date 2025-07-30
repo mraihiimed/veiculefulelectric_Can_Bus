@@ -1,0 +1,2 @@
+../Core/Src/test_FuelActuator_EncodeSignals.c:22:6:arraysEqual	32	static
+../Core/Src/test_FuelActuator_EncodeSignals.c:29:6:test_FuelActuator_EncodeSignals	56	static
