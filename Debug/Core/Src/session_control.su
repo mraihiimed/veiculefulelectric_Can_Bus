@@ -1,0 +1,2 @@
+../Core/Src/session_control.c:13:6:HandleSessionControl	24	static
+../Core/Src/session_control.c:35:9:GetCurrentSession	4	static
